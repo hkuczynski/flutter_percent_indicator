@@ -18,6 +18,9 @@ class CircularPercentIndicator extends StatefulWidget {
   final Color backgroundColor;
   final Color progressColor;
 
+  /// Gradient applied to the circle
+  final Gradient gradient;
+
   ///true if you want the circle to have animation
   final bool animation;
 
@@ -53,6 +56,7 @@ class CircularPercentIndicator extends StatefulWidget {
     @required this.radius,
     this.fillColor = Colors.transparent,
     this.backgroundColor = const Color(0xFFB8C7CB),
+    this.gradient,
     this.progressColor = Colors.red,
     this.animation = false,
     this.animationDuration = 500,
@@ -147,6 +151,7 @@ class _CircularPercentIndicatorState extends State<CircularPercentIndicator>
               progress: _percent * 360,
               progressColor: widget.progressColor,
               backgroundColor: widget.backgroundColor,
+              gradient: widget.gradient,
               startAngle: widget.startAngle,
               circularStrokeCap: widget.circularStrokeCap,
               radius: (widget.radius / 2) - widget.lineWidth / 2,
@@ -183,6 +188,7 @@ class CirclePainter extends CustomPainter {
   final radius;
   final Color progressColor;
   final Color backgroundColor;
+  final Gradient gradient;
   final CircularStrokeCap circularStrokeCap;
   final double startAngle;
 
@@ -192,6 +198,7 @@ class CirclePainter extends CustomPainter {
       @required this.radius,
       this.progressColor,
       this.backgroundColor,
+      this.gradient,
       this.startAngle = 0.0,
       this.circularStrokeCap = CircularStrokeCap.round}) {
     _paintBackground.color = backgroundColor;
@@ -214,12 +221,17 @@ class CirclePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     canvas.drawCircle(center, radius, _paintBackground);
+    final Rect rect = Rect.fromCircle(center: center, radius: radius);
+    if (gradient != null) {
+      _paintLine.shader = gradient.createShader(rect);
+    }
     canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        math.radians(-90.0 + startAngle),
-        math.radians(progress),
-        false,
-        _paintLine);
+      rect,
+      math.radians(-90.0 + startAngle),
+      math.radians(progress),
+      false,
+      _paintLine,
+    );
   }
 
   @override
